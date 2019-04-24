@@ -46,7 +46,10 @@ main() {
         fi
         echo "{ \"issue\": { \"assigned_to_id\": $assignee, \"status_id\": $next_status_id  }}" |
             http PUT "$REDMINE_HOST/issues/$issue_id.json" "X-Redmine-API-Key":"$REDMINE_API_KEY" >/dev/null
-        echo "Update issue $issue_id"
+        echo "----------------------"
+        echo "Update issue #$issue_id"
+        echo "$REDMINE_HOST/issues/$issue_id"
+        echo "----------------------"
     done
 }
 

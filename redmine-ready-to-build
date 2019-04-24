@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+
+set -o nounset
+
+main() {
+    if [[ -z $REDMINE_API_KEY ]]
+    then
+        echo 'Please set $REDMINE_API_KEY variable'
+        exit 1
+    fi
+
+    if [[ -z $REDMINE_HOST ]]
+    then
+        echo 'Please set $REDMINE_HOST variable'
+        exit 1
+    fi
+
+    next_status_id=""
+    assignee=""
+
+    while getopts ":n:a:" opt; do
+        case $opt in
+            n ) next_status_id=$OPTARG ;;
+            a ) assignee=$OPTARG ;;
+            \? ) print_usage ;;
+            :)
+            echo "Option -$OPTARG requires an argument."
+            exit 1
+            ;;
+        esac
+    done
+
+    (
+        [[ -z "$next_status_id" ]] ||
+        [[ -z "$assignee" ]]
+    ) &&
+    print_usage
+
+    shift $((OPTIND - 1))
+    IFS=' '
+    readarray -t lines <<< "$@"
+
+    for issue_id in "${lines[@]}"
+    do
+        if [[ -z $issue_id ]]; then
+            continue
+        fi
+        echo "{ \"issue\": { \"assigned_to_id\": $assignee, \"status_id\": $next_status_id  }}" |
+            http PUT "$REDMINE_HOST/issues/$issue_id.json" "X-Redmine-API-Key":"$REDMINE_API_KEY" >/dev/null
+        echo "Update issue $issue_id"
+    done
+}
+
+print_usage() {
+    echo "Usage: $0 -n <next_status_id> -a <assignee> <tickers_numbers>..."
+    exit 1
+}
+
+main "$@"

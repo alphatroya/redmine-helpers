@@ -37,8 +37,7 @@ main() {
     print_usage
 
     shift $((OPTIND - 1))
-    IFS=' '
-    readarray -t lines <<< "$@"
+    lines=($(echo "$@" | tr ' ' '\n'))
 
     for issue_id in "${lines[@]}"
     do

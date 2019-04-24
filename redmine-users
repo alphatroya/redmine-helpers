@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+set -o nounset
+
+main() {
+    if [[ -z $REDMINE_API_KEY ]]
+    then
+        echo 'Please set $REDMINE_API_KEY variable'
+        exit 1
+    fi
+
+    if [[ -z $REDMINE_HOST ]]
+    then
+        echo 'Please set $REDMINE_HOST variable'
+        exit 1
+    fi
+
+    project_id=""
+
+    while getopts ":p:" opt; do
+        case $opt in
+            p ) project_id=$OPTARG ;;
+            \? ) print_usage ;;
+            :)
+            echo "Option -$OPTARG requires an argument."
+            exit 1
+            ;;
+        esac
+    done
+
+    [[ -z "$project_id" ]] && print_usage
+    http GET "$REDMINE_HOST/issues.json" project_id==$project_id limit==1000 "X-Redmine-API-Key":"$REDMINE_API_KEY" | jq '[.issues[].author] | unique_by(.id)'
+}
+
+print_usage() {
+    echo "Usage: $0 -p <project_id>"
+    exit 1
+}
+
+main "$@"

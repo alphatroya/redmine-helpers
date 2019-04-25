@@ -1,20 +1,6 @@
 #!/usr/bin/env bash
 
-set -o nounset
-
 main() {
-    if [[ -z $REDMINE_API_KEY ]]
-    then
-        echo 'Please set $REDMINE_API_KEY variable'
-        exit 1
-    fi
-
-    if [[ -z $REDMINE_HOST ]]
-    then
-        echo 'Please set $REDMINE_HOST variable'
-        exit 1
-    fi
-
     project_id=""
     status_id=""
     next_status_id=""
@@ -66,4 +52,6 @@ print_usage() {
     exit 1
 }
 
+.  ./redmine-check
+check_env
 main "$@"

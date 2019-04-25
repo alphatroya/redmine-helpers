@@ -23,6 +23,6 @@ print_usage() {
     exit 1
 }
 
-.  ./redmine-check
+.  redmine-check
 check_env
 main "$@"

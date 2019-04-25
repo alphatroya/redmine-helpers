@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 
-.  ./redmine-check
+.  redmine-check
 check_env
 brew install httpie jq

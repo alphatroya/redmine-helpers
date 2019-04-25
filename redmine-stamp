@@ -4,15 +4,13 @@ main() {
     project_id=""
     status_id=""
     next_status_id=""
-    assignee=""
     build_number=""
 
-    while getopts ":p:s:n:a:b:" opt; do
+    while getopts ":p:s:n:b:" opt; do
         case $opt in
             p ) project_id=$OPTARG ;;
             s ) status_id=$OPTARG ;;
             n ) next_status_id=$OPTARG ;;
-            a ) assignee=$OPTARG ;;
             b ) build_number=$OPTARG ;;
             \? ) print_usage ;;
             :)
@@ -26,7 +24,6 @@ main() {
         [[ -z "$project_id" ]] ||
         [[ -z "$status_id" ]] ||
         [[ -z "$next_status_id" ]] ||
-        [[ -z "$assignee" ]] ||
         [[ -z "$build_number" ]]
     ) &&
     print_usage
@@ -41,6 +38,7 @@ main() {
         if [[ -z $issue_id ]]; then
             continue
         fi
+        assignee=$(http GET "$REDMINE_HOST/issues/$issue_id.json" "X-Redmine-API-Key":"$REDMINE_API_KEY" | jq '.issue.author.id')
         echo "{ \"issue\": { \"assigned_to_id\": $assignee, \"status_id\": $next_status_id, \"custom_fields\": [{\"id\": 32, \"value\": \"$build_number\" }] }}" |
             http PUT "$REDMINE_HOST/issues/$issue_id.json" "X-Redmine-API-Key":"$REDMINE_API_KEY" >/dev/null
         echo "Update issue #$issue_id"
@@ -48,7 +46,7 @@ main() {
 }
 
 print_usage() {
-    echo "Usage: $0 -p <project_id> -s <status_id> -n <next_status_id> -a <assignee> -b <build_number>"
+    echo "Usage: $0 -p <project_id> -s <status_id> -n <next_status_id> -b <build_number>"
     exit 1
 }
 

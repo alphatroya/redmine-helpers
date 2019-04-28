@@ -3,13 +3,13 @@
 check_env() {
     if [[ -z $REDMINE_API_KEY ]]
     then
-        echo 'Please set $REDMINE_API_KEY variable'
+        echo "Please set REDMINE_API_KEY variable"
         exit 1
     fi
 
     if [[ -z $REDMINE_HOST ]]
     then
-        echo 'Please set $REDMINE_HOST variable'
+        echo "Please set REDMINE_HOST variable"
         exit 1
     fi
 }

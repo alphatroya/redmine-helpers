@@ -16,14 +16,14 @@ main() {
         esac
     done
 
-    (
+    {
         [[ -z "$next_status_id" ]] ||
         [[ -z "$assignee" ]]
-    ) &&
+    } &&
     print_usage
 
     shift $((OPTIND - 1))
-    lines=($(echo "$@" | tr ' ' '\n'))
+    mapfile -t lines < <(echo "$@" | tr ' ' '\n')
 
     for issue_id in "${lines[@]}"
     do
@@ -32,10 +32,7 @@ main() {
         fi
         echo "{ \"issue\": { \"assigned_to_id\": $assignee, \"status_id\": $next_status_id  }}" |
             http PUT "$REDMINE_HOST/issues/$issue_id.json" "X-Redmine-API-Key":"$REDMINE_API_KEY" >/dev/null
-        echo "----------------------"
-        echo "Update issue #$issue_id"
-        echo "$REDMINE_HOST/issues/$issue_id"
-        echo "----------------------"
+        echo "Updated issue with #$issue_id ✅"
     done
 }
 

@@ -20,15 +20,15 @@ main() {
         esac
     done
 
-    (
+    {
         [[ -z "$project_id" ]] ||
         [[ -z "$status_id" ]] ||
         [[ -z "$next_status_id" ]] ||
         [[ -z "$build_number" ]]
-    ) &&
+    } &&
     print_usage
 
-    issues=$(http GET "$REDMINE_HOST/issues.json" project_id==$project_id status_id==$status_id "X-Redmine-API-Key":"$REDMINE_API_KEY" | jq '.issues | map(.id) | .[]')
+    issues=$(http GET "$REDMINE_HOST/issues.json" project_id=="$project_id" status_id=="$status_id" "X-Redmine-API-Key":"$REDMINE_API_KEY" | jq '.issues | map(.id) | .[]')
     IFS='
     '
     readarray -t lines <<< "$issues"
@@ -41,7 +41,7 @@ main() {
         assignee=$(http GET "$REDMINE_HOST/issues/$issue_id.json" "X-Redmine-API-Key":"$REDMINE_API_KEY" | jq '.issue.author.id')
         echo "{ \"issue\": { \"assigned_to_id\": $assignee, \"status_id\": $next_status_id, \"custom_fields\": [{\"id\": 32, \"value\": \"$build_number\" }] }}" |
             http PUT "$REDMINE_HOST/issues/$issue_id.json" "X-Redmine-API-Key":"$REDMINE_API_KEY" >/dev/null
-        echo "Update issue #$issue_id"
+        echo "Updated issue with #$issue_id ✅"
     done
 }
 

@@ -28,7 +28,12 @@ main() {
     } &&
     print_usage
 
-    issues=$(http GET "$REDMINE_HOST/issues.json" project_id=="$project_id" status_id=="$status_id" "X-Redmine-API-Key":"$REDMINE_API_KEY" | jq '.issues | map(.id) | .[]')
+    issues=$(curl -s \
+        -H "X-Redmine-API-Key: $REDMINE_API_KEY" \
+        -H 'Content-Type: application/json' \
+        "$REDMINE_HOST/issues.json?project_id=$project_id&status_id=$status_id" | jq '.issues | map(.id) | .[]'
+    )
+
     IFS='
     '
     readarray -t lines <<< "$issues"
@@ -38,9 +43,12 @@ main() {
         if [[ -z $issue_id ]]; then
             continue
         fi
-        assignee=$(http GET "$REDMINE_HOST/issues/$issue_id.json" "X-Redmine-API-Key":"$REDMINE_API_KEY" | jq '.issue.author.id')
-        echo "{ \"issue\": { \"assigned_to_id\": $assignee, \"status_id\": $next_status_id, \"custom_fields\": [{\"id\": 32, \"value\": \"$build_number\" }] }}" |
-            http PUT "$REDMINE_HOST/issues/$issue_id.json" "X-Redmine-API-Key":"$REDMINE_API_KEY" >/dev/null
+        assignee=$(curl -s -H "X-Redmine-API-Key: $REDMINE_API_KEY" "$REDMINE_HOST/issues/$issue_id.json" | jq '.issue.author.id')
+        curl -s -X PUT \
+            -H "X-Redmine-API-Key: $REDMINE_API_KEY" \
+            -H 'Content-Type: application/json' \
+            -d "{ \"issue\": { \"assigned_to_id\": $assignee, \"status_id\": $next_status_id, \"custom_fields\": [{\"id\": 32, \"value\": \"$build_number\" }] }}" \
+            "$REDMINE_HOST/issues/$issue_id.json"
         echo "Updated issue with #$issue_id ✅"
     done
 }

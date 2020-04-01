@@ -34,6 +34,12 @@ main() {
         curl -s -X PUT \
             -H "X-Redmine-API-Key: $REDMINE_API_KEY" \
             -H "Content-Type: application/json" \
+            -d "{ \"issue\": { \"assigned_to_id\": $assignee, \"status_id\": 2  }}" \
+            "$REDMINE_HOST/issues/$issue_id.json"
+
+        curl -s -X PUT \
+            -H "X-Redmine-API-Key: $REDMINE_API_KEY" \
+            -H "Content-Type: application/json" \
             -d "{ \"issue\": { \"assigned_to_id\": $assignee, \"status_id\": $next_status_id  }}" \
             "$REDMINE_HOST/issues/$issue_id.json"
         echo "Updated status for issue with id #$issue_id ✅"
